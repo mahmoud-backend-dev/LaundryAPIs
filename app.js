@@ -14,7 +14,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean')
 
 
-const authRoute = require('./routes/authRoute');
+const mountRoutes = require('./routes');
 const errorHandler = require('./middleware/error-handler');
 const notFoundErr = require('./middleware/notFoundMiddleware');
 const connectDB = require('./db/connectDB');
@@ -54,8 +54,8 @@ app.use(limiter)
 // Express middleware to protect against HTTP Parameter Pollution attacks
 app.use(hpp())
 
-
-app.use('/api/v1/auth', authRoute);
+// Mount APIs
+mountRoutes(app);
 
 app.use(errorHandler);
 app.use(notFoundErr);

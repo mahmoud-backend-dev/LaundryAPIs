@@ -1,6 +1,6 @@
 const validatorMiddleWare = require('../../middleware/validatorMiddleware');
-const { body } = require('express-validator');
-const { BadRequest  } = require('../../errors');
+const { body, param } = require('express-validator');
+const { BadRequest, NotFoundError  } = require('../../errors');
 const User = require('../../models/User');
 
 exports.signupValidator = [
@@ -60,6 +60,16 @@ exports.changePasswordValidator = [
         throw new BadRequest('Password confirmation incorrect')
       return true
     }),  
+  validatorMiddleWare,
+]
+
+exports.deleteSpecificUserValidator = [
+  param('id').custom(async (val) => {
+    const user = await User.findById(val);
+    if (!user)
+      throw new NotFoundError(`No user founded for this ${val}`)
+    return true
+  }),
   validatorMiddleWare,
 ]
 

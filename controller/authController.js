@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const { StatusCodes } = require('http-status-codes');
-const { CustomErrorAPI, BadRequest, NotFoundError } = require('../errors');
+const { CustomErrorAPI, BadRequest, NotFoundError , UnauthenticatedError } = require('../errors');
 const asyncHandler = require('express-async-handler');
 const {sendSMS} = require('../utils/sendSMS');
 const User = require('../models/User');
@@ -8,6 +8,7 @@ const { santizeData } = require('../utils/santizeData');
 
 const hashedResetCodeByCrypto = (resetCode) => crypto.createHash('sha256').update(resetCode).digest('hex');
 
+let ph;
 
 //  allwoed to (user permission)
 exports.allowTo = (...roles) => (asyncHandler(async (req, res, next) => {
@@ -79,6 +80,9 @@ exports.signup = asyncHandler(async (req, res, next) => {
   res.status(StatusCodes.OK).json({ status: 'Success', message: 'Reset code sent to phone' });
 });
 
+// @desc Verify Reset Code For Signup
+// @route POST /api/v1/auth/varifyResetCodeForSignup
+// @protect Public
 exports.varifyResetCodeForSignup = asyncHandler(async (req, res, next) => {
 
   const hashedResetCode = hashedResetCodeByCrypto(req.body.resetCode);
@@ -99,6 +103,9 @@ exports.varifyResetCodeForSignup = asyncHandler(async (req, res, next) => {
   res.status(StatusCodes.CREATED).json({ message: "Success", token, data: santizeData(user) });
 });
 
+// @desc Resend Reset Code For Signup
+// @route POST /api/v1/auth/signup/resendResetCode
+// @protect Public
 exports.resendRestCodeForSignup = asyncHandler(async (req, res) => {
   // Get User by phone
   const user = await User.findOne({ phone: req.body.phone });
@@ -126,7 +133,9 @@ exports.resendRestCodeForSignup = asyncHandler(async (req, res) => {
   res.status(StatusCodes.OK).json({ status: 'Success', message: 'Reset code sent to phone' })
 });
 
-
+// @desc Resend Reset Code For Password
+// @route POST /api/v1/auth/forgetPassword/resendResetCode
+// @protect Public
 exports.resendRestCodeForPassword = asyncHandler(async (req, res) => {
   // Get User by phone
   const user = await User.findOne({ phone: req.body.phone });
@@ -154,6 +163,9 @@ exports.resendRestCodeForPassword = asyncHandler(async (req, res) => {
   res.status(StatusCodes.OK).json({ status: 'Success', message: 'Reset code sent to phone' })
 });
 
+// @desc Login
+// @route POST /api/v1/auth/login
+// @protect Public
 exports.login = asyncHandler(async (req, res, next) => {
   const user = await User.findOne({ phone: req.body.phone });
   if (user.hashedResetCodeForSignup) {
@@ -166,7 +178,9 @@ exports.login = asyncHandler(async (req, res, next) => {
   res.status(StatusCodes.OK).json({ data: santizeData(user), token });
 });
 
-
+// @desc Forget Password
+// @route POST /api/v1/auth/forgetPassword
+// @protect Public
 exports.forgetPassword = asyncHandler(async (req, res) => {
   // Get User by phone
   const user = await User.findOne({ phone: req.body.phone });
@@ -194,7 +208,9 @@ exports.forgetPassword = asyncHandler(async (req, res) => {
   res.status(StatusCodes.OK).json({ status: 'Success', message: 'Reset code sent to phone' })
 });
 
-
+// @desc Verify Reset Code For Password
+// @route POST /api/v1/auth/varifyResetCodeForPassword
+// @protect Public
 exports.varifyResetCodeForPassword = asyncHandler(async (req, res) => {
   const hashedResetCode = hashedResetCodeByCrypto(req.body.resetCode);
   // Get user based on reset code
@@ -210,7 +226,9 @@ exports.varifyResetCodeForPassword = asyncHandler(async (req, res) => {
   res.status(StatusCodes.OK).json({ status: "Success" });
 });
 
-
+// @desc Reset Password
+// @route POST /api/v1/auth/resetPassword
+// @protect Public
 exports.resetPassword = asyncHandler(async (req, res) => {
   // Get user based on phone
   const user = await User.findOne({ phone: req.body.phone })
@@ -227,7 +245,9 @@ exports.resetPassword = asyncHandler(async (req, res) => {
   res.status(StatusCodes.OK).json({ token, data: santizeData(user) });
 });
 
-
+// @desc Change Password
+// @route POST /api/v1/auth/changePassword
+// @protect Public
 exports.changePassword = asyncHandler(async (req, res) => {
   const user = await User.findOneAndUpdate(
     {
@@ -243,4 +263,217 @@ exports.changePassword = asyncHandler(async (req, res) => {
   await user.hashedPassword();
   const token = user.createJWT();
   res.status(StatusCodes.OK).json({ token, data: santizeData(user) });
+});
+
+// @desc Get All Users
+// @route GET /api/v1/auth/users
+// @protect Protect/Admin Only
+exports.getAllUsers = asyncHandler(async (req, res) => {
+  const users = await User.find({});
+  if (Object.keys.length === 0)
+    throw new NotFoundError('No users founded')
+  
+  res.status(StatusCodes.OK).json({ status: "Success", users });
+});
+
+// @desc Delete Specific User
+// @route DELETE /api/v1/auth/users/:id
+// @protect Protect/Admin Only
+exports.deleteSpecificUser = asyncHandler(async (req, res) => {
+  await User.findByIdAndRemove(req.params.id);
+  res.status(StatusCodes.NO_CONTENT).send();
+});
+
+
+// @desc Get All User Booking Order
+// @route DELETE /api/v1/auth/users/bookingOrder
+// @protect Protect/User
+exports.getAllBookingOrder = asyncHandler(async (req, res) => {
+  const result1 = { daily: [], monthly: [], special: [], yearly: [] };
+  const result2 = { daily: [], monthly: [], special: [], yearly: [] };
+  const arrayCompleted = [];
+  const arrayNonCompleted = [];
+
+  // Handle to aggregation on data booking daily
+  const allBookingDaily = await User.aggregate([
+    {
+      $lookup: {
+        from: 'dailies',
+        localField: 'phone',
+        foreignField: 'userPhone',
+        as: 'daily'
+      },
+    },
+    {
+      $unwind: '$daily'
+    },
+    {
+      $match: { "daily.userPhone": req.user.phone }
+    },
+    {
+      $project: {
+        _id: 0,
+        firstName: 0,
+        lastName: 0,
+        phone: 0,
+        password: 0,
+        role: 0,
+        resetVerifyForSignup: 0,
+        __v: 0,
+      }
+    },
+    { $sort: { "daily.date": 1 } },
+  ],
+  );
+  
+  // Handle to aggregation on data booking monthly
+  const allBookingMonthly = await User.aggregate([
+    {
+      $lookup: {
+        from: 'monthlies',
+        localField: 'phone',
+        foreignField: 'userPhone',
+        as: 'monthly'
+      },
+    },
+    {
+      $unwind: '$monthly'
+    },
+    {
+      $match: { "monthly.userPhone": req.user.phone }
+    },
+    {
+      $project: {
+        _id: 0,
+        firstName: 0,
+        lastName: 0,
+        phone: 0,
+        password: 0,
+        role: 0,
+        resetVerifyForSignup: 0,
+        __v: 0,
+      }
+    },
+    { $sort: { createdAt: -1 } },
+  ],
+  );
+
+  // Handle to aggregation on data booking monthly
+  const allBookingSpecial = await User.aggregate([
+    {
+      $lookup: {
+        from: 'specials',
+        localField: 'phone',
+        foreignField: 'userPhone',
+        as: 'special'
+      },
+    },
+    {
+      $unwind: '$special'
+    },
+    {
+      $match: { "special.userPhone": req.user.phone }
+    },
+    {
+      $project: {
+        _id: 0,
+        firstName: 0,
+        lastName: 0,
+        phone: 0,
+        password: 0,
+        role: 0,
+        resetVerifyForSignup: 0,
+        __v: 0,
+      }
+    },
+    { $sort: { createdAt: -1 } },
+  ],
+  );
+
+  // Handle to aggregation on data booking yearly
+  const allBookingYearly = await User.aggregate([
+    {
+      $lookup: {
+        from: 'yearlies',
+        localField: 'phone',
+        foreignField: 'userPhone',
+        as: 'yearly'
+      },
+    },
+    {
+      $unwind: '$yearly'
+    },
+    {
+      $match: { "yearly.userPhone": req.user.phone }
+    },
+    {
+      $project: {
+        _id: 0,
+        firstName: 0,
+        lastName: 0,
+        phone: 0,
+        password: 0,
+        role: 0,
+        resetVerifyForSignup: 0,
+        __v: 0,
+      }
+    },
+    { $sort: { createdAt: -1 } },
+  ],
+  );
+
+  // Handle to show data booking daily
+  allBookingDaily.filter((obj1) => obj1["daily"]["completed"] === true).map((obj2) => {
+    result1.daily.push(Object.values(obj2)[0]);
+  })
+  allBookingDaily.filter((obj1) => obj1["daily"]["completed"] === false).map((obj2) => {
+    result2.daily.push(Object.values(obj2)[0]);
+  });
+  
+  // Handle to show data booking monthly
+  allBookingMonthly.filter((obj1) => obj1["monthly"]["completed"] === true).map((obj2) => {
+    result1.monthly.push(Object.values(obj2)[0]);
+  })
+  allBookingMonthly.filter((obj1) => obj1["monthly"]["completed"] === false).map((obj2) => {
+    result2.monthly.push(Object.values(obj2)[0]);
+  });
+
+
+  // Handle to show data booking special
+  allBookingSpecial.filter((obj1) => obj1["special"]["completed"] === true).map((obj2) => {
+    result1.special.push(Object.values(obj2)[0]);
+  })
+  allBookingSpecial.filter((obj1) => obj1["special"]["completed"] === false).map((obj2) => {
+    result2.special.push(Object.values(obj2)[0]);
+  });
+
+  // Handle to show data booking yearly
+  allBookingYearly.filter((obj1) => obj1["yearly"]["completed"] === true).map((obj2) => {
+    result1.yearly.push(Object.values(obj2)[0]);
+  })
+  allBookingYearly.filter((obj1) => obj1["yearly"]["completed"] === false).map((obj2) => {
+    result2.yearly.push(Object.values(obj2)[0]);
+  });
+  
+  arrayCompleted.push(result1);
+
+  arrayNonCompleted.push(result2);
+
+  // console.log(allBookingMonthly);
+  res.status(StatusCodes.OK).json({ status: "Success", arrayCompleted, arrayNonCompleted });
+});
+
+
+// @desc Delete User Data
+// @route DELETE /api/v1/auth/users/deleteMe
+// @protect Protect/User
+exports.deleteUserData = asyncHandler(async (req, res) => {
+  console.log("teas");
+  await User.findOneAndRemove({
+    _id: req.user._id
+  });
+  res.status(StatusCodes.NO_CONTENT).send();
 })
+
+
+

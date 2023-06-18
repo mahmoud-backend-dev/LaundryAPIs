@@ -14,12 +14,17 @@ const userSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: true,
+    unique: true,
   },
   password: {
     type: String,
     required: true
   },
-
+  role: {
+    type: String,
+    default: 'user',
+    enum: ['user', 'admin']
+  },
   hashedResetCodeForSignup: String,
   resetVerifyForSignup: Boolean,
 

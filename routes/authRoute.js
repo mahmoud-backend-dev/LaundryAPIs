@@ -1,6 +1,9 @@
 
 const express = require('express');
 const router = express.Router();
+
+const authMiddleWare = require('../middleware/authMiddleware');
+
 const {
   signup,
   varifyResetCodeForSignup,
@@ -10,7 +13,12 @@ const {
   resetPassword,
   resendRestCodeForSignup,
   resendRestCodeForPassword,
-  changePassword
+  changePassword,
+  allowTo,
+  getAllUsers,
+  deleteSpecificUser,
+  getAllBookingOrder,
+  deleteUserData
 } = require('../controller/authController')
 const {
   signupValidator,
@@ -18,7 +26,8 @@ const {
   loginValidator,
   forgetPasswordValidator,
   resetPasswordValidator,
-  changePasswordValidator
+  changePasswordValidator,
+  deleteSpecificUserValidator
 } = require('../utils/validators/authValidator')
 
 
@@ -34,5 +43,11 @@ router.post('/varifyResetCodeForPassword', varifyCodeValidator, varifyResetCodeF
 router.post('/resetPassword',resetPasswordValidator,resetPassword)
 
 router.post('/changePassword', changePasswordValidator, changePassword);
+
+router.get('/users', authMiddleWare, allowTo('admin'), getAllUsers);
+router.delete('/users/:id', authMiddleWare, allowTo('admin'), deleteSpecificUserValidator, deleteSpecificUser);
+router.delete('/deleteMe', authMiddleWare, allowTo('user'),deleteUserData);
+
+router.get('/users/bookingOrder', authMiddleWare, allowTo('user'), getAllBookingOrder);
 
 module.exports = router;
