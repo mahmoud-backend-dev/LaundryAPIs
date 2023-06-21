@@ -289,8 +289,6 @@ exports.deleteSpecificUser = asyncHandler(async (req, res) => {
 // @route DELETE /api/v1/auth/users/bookingOrder
 // @protect Protect/User
 exports.getAllBookingOrder = asyncHandler(async (req, res) => {
-  const result1 = { daily: [], monthly: [], special: [], yearly: [] };
-  const result2 = { daily: [], monthly: [], special: [], yearly: [] };
   const arrayCompleted = [];
   const arrayNonCompleted = [];
 
@@ -326,140 +324,14 @@ exports.getAllBookingOrder = asyncHandler(async (req, res) => {
   ],
   );
   
-  // Handle to aggregation on data booking monthly
-  const allBookingMonthly = await User.aggregate([
-    {
-      $lookup: {
-        from: 'monthlies',
-        localField: 'phone',
-        foreignField: 'userPhone',
-        as: 'monthly'
-      },
-    },
-    {
-      $unwind: '$monthly'
-    },
-    {
-      $match: { "monthly.userPhone": req.user.phone }
-    },
-    {
-      $project: {
-        _id: 0,
-        firstName: 0,
-        lastName: 0,
-        phone: 0,
-        password: 0,
-        role: 0,
-        resetVerifyForSignup: 0,
-        __v: 0,
-      }
-    },
-    { $sort: { createdAt: -1 } },
-  ],
-  );
-
-  // Handle to aggregation on data booking monthly
-  const allBookingSpecial = await User.aggregate([
-    {
-      $lookup: {
-        from: 'specials',
-        localField: 'phone',
-        foreignField: 'userPhone',
-        as: 'special'
-      },
-    },
-    {
-      $unwind: '$special'
-    },
-    {
-      $match: { "special.userPhone": req.user.phone }
-    },
-    {
-      $project: {
-        _id: 0,
-        firstName: 0,
-        lastName: 0,
-        phone: 0,
-        password: 0,
-        role: 0,
-        resetVerifyForSignup: 0,
-        __v: 0,
-      }
-    },
-    { $sort: { createdAt: -1 } },
-  ],
-  );
-
-  // Handle to aggregation on data booking yearly
-  const allBookingYearly = await User.aggregate([
-    {
-      $lookup: {
-        from: 'yearlies',
-        localField: 'phone',
-        foreignField: 'userPhone',
-        as: 'yearly'
-      },
-    },
-    {
-      $unwind: '$yearly'
-    },
-    {
-      $match: { "yearly.userPhone": req.user.phone }
-    },
-    {
-      $project: {
-        _id: 0,
-        firstName: 0,
-        lastName: 0,
-        phone: 0,
-        password: 0,
-        role: 0,
-        resetVerifyForSignup: 0,
-        __v: 0,
-      }
-    },
-    { $sort: { createdAt: -1 } },
-  ],
-  );
-
   // Handle to show data booking daily
   allBookingDaily.filter((obj1) => obj1["daily"]["completed"] === true).map((obj2) => {
-    result1.daily.push(Object.values(obj2)[0]);
+    arrayCompleted.push(Object.values(obj2)[0]);
   })
   allBookingDaily.filter((obj1) => obj1["daily"]["completed"] === false).map((obj2) => {
-    result2.daily.push(Object.values(obj2)[0]);
-  });
-  
-  // Handle to show data booking monthly
-  allBookingMonthly.filter((obj1) => obj1["monthly"]["completed"] === true).map((obj2) => {
-    result1.monthly.push(Object.values(obj2)[0]);
-  })
-  allBookingMonthly.filter((obj1) => obj1["monthly"]["completed"] === false).map((obj2) => {
-    result2.monthly.push(Object.values(obj2)[0]);
+    arrayNonCompleted.push(Object.values(obj2)[0]);
   });
 
-
-  // Handle to show data booking special
-  allBookingSpecial.filter((obj1) => obj1["special"]["completed"] === true).map((obj2) => {
-    result1.special.push(Object.values(obj2)[0]);
-  })
-  allBookingSpecial.filter((obj1) => obj1["special"]["completed"] === false).map((obj2) => {
-    result2.special.push(Object.values(obj2)[0]);
-  });
-
-  // Handle to show data booking yearly
-  allBookingYearly.filter((obj1) => obj1["yearly"]["completed"] === true).map((obj2) => {
-    result1.yearly.push(Object.values(obj2)[0]);
-  })
-  allBookingYearly.filter((obj1) => obj1["yearly"]["completed"] === false).map((obj2) => {
-    result2.yearly.push(Object.values(obj2)[0]);
-  });
-  
-  arrayCompleted.push(result1);
-
-  arrayNonCompleted.push(result2);
-
-  // console.log(allBookingMonthly);
   res.status(StatusCodes.OK).json({ status: "Success", arrayCompleted, arrayNonCompleted });
 });
 
@@ -473,7 +345,186 @@ exports.deleteUserData = asyncHandler(async (req, res) => {
     _id: req.user._id
   });
   res.status(StatusCodes.NO_CONTENT).send();
-})
+});
+
+
+// @desc Get All User Booking Order
+// @route DELETE /api/v1/auth/users/bookingOrder
+// @protect Protect/User
+// exports.getAllBookingOrder = asyncHandler(async (req, res) => {
+//   const result1 = { daily: [], monthly: [], special: [], yearly: [] };
+//   const result2 = { daily: [], monthly: [], special: [], yearly: [] };
+//   const arrayCompleted = [];
+//   const arrayNonCompleted = [];
+
+//   // Handle to aggregation on data booking daily
+//   const allBookingDaily = await User.aggregate([
+//     {
+//       $lookup: {
+//         from: 'dailies',
+//         localField: 'phone',
+//         foreignField: 'userPhone',
+//         as: 'daily'
+//       },
+//     },
+//     {
+//       $unwind: '$daily'
+//     },
+//     {
+//       $match: { "daily.userPhone": req.user.phone }
+//     },
+//     {
+//       $project: {
+//         _id: 0,
+//         firstName: 0,
+//         lastName: 0,
+//         phone: 0,
+//         password: 0,
+//         role: 0,
+//         resetVerifyForSignup: 0,
+//         __v: 0,
+//       }
+//     },
+//     { $sort: { "daily.date": 1 } },
+//   ],
+//   );
+  
+//   // Handle to aggregation on data booking monthly
+//   const allBookingMonthly = await User.aggregate([
+//     {
+//       $lookup: {
+//         from: 'monthlies',
+//         localField: 'phone',
+//         foreignField: 'userPhone',
+//         as: 'monthly'
+//       },
+//     },
+//     {
+//       $unwind: '$monthly'
+//     },
+//     {
+//       $match: { "monthly.userPhone": req.user.phone }
+//     },
+//     {
+//       $project: {
+//         _id: 0,
+//         firstName: 0,
+//         lastName: 0,
+//         phone: 0,
+//         password: 0,
+//         role: 0,
+//         resetVerifyForSignup: 0,
+//         __v: 0,
+//       }
+//     },
+//     { $sort: { createdAt: -1 } },
+//   ],
+//   );
+
+//   // Handle to aggregation on data booking monthly
+//   const allBookingSpecial = await User.aggregate([
+//     {
+//       $lookup: {
+//         from: 'specials',
+//         localField: 'phone',
+//         foreignField: 'userPhone',
+//         as: 'special'
+//       },
+//     },
+//     {
+//       $unwind: '$special'
+//     },
+//     {
+//       $match: { "special.userPhone": req.user.phone }
+//     },
+//     {
+//       $project: {
+//         _id: 0,
+//         firstName: 0,
+//         lastName: 0,
+//         phone: 0,
+//         password: 0,
+//         role: 0,
+//         resetVerifyForSignup: 0,
+//         __v: 0,
+//       }
+//     },
+//     { $sort: { createdAt: -1 } },
+//   ],
+//   );
+
+//   // Handle to aggregation on data booking yearly
+//   const allBookingYearly = await User.aggregate([
+//     {
+//       $lookup: {
+//         from: 'yearlies',
+//         localField: 'phone',
+//         foreignField: 'userPhone',
+//         as: 'yearly'
+//       },
+//     },
+//     {
+//       $unwind: '$yearly'
+//     },
+//     {
+//       $match: { "yearly.userPhone": req.user.phone }
+//     },
+//     {
+//       $project: {
+//         _id: 0,
+//         firstName: 0,
+//         lastName: 0,
+//         phone: 0,
+//         password: 0,
+//         role: 0,
+//         resetVerifyForSignup: 0,
+//         __v: 0,
+//       }
+//     },
+//     { $sort: { createdAt: -1 } },
+//   ],
+//   );
+
+//   // Handle to show data booking daily
+//   allBookingDaily.filter((obj1) => obj1["daily"]["completed"] === true).map((obj2) => {
+//     result1.daily.push(Object.values(obj2)[0]);
+//   })
+//   allBookingDaily.filter((obj1) => obj1["daily"]["completed"] === false).map((obj2) => {
+//     result2.daily.push(Object.values(obj2)[0]);
+//   });
+  
+//   // Handle to show data booking monthly
+//   allBookingMonthly.filter((obj1) => obj1["monthly"]["completed"] === true).map((obj2) => {
+//     result1.monthly.push(Object.values(obj2)[0]);
+//   })
+//   allBookingMonthly.filter((obj1) => obj1["monthly"]["completed"] === false).map((obj2) => {
+//     result2.monthly.push(Object.values(obj2)[0]);
+//   });
+
+
+//   // Handle to show data booking special
+//   allBookingSpecial.filter((obj1) => obj1["special"]["completed"] === true).map((obj2) => {
+//     result1.special.push(Object.values(obj2)[0]);
+//   })
+//   allBookingSpecial.filter((obj1) => obj1["special"]["completed"] === false).map((obj2) => {
+//     result2.special.push(Object.values(obj2)[0]);
+//   });
+
+//   // Handle to show data booking yearly
+//   allBookingYearly.filter((obj1) => obj1["yearly"]["completed"] === true).map((obj2) => {
+//     result1.yearly.push(Object.values(obj2)[0]);
+//   })
+//   allBookingYearly.filter((obj1) => obj1["yearly"]["completed"] === false).map((obj2) => {
+//     result2.yearly.push(Object.values(obj2)[0]);
+//   });
+  
+//   arrayCompleted.push(result1);
+
+//   arrayNonCompleted.push(result2);
+
+//   // console.log(allBookingMonthly);
+//   res.status(StatusCodes.OK).json({ status: "Success", arrayCompleted, arrayNonCompleted });
+// });
 
 
 
