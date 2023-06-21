@@ -317,6 +317,8 @@ exports.getAllBookingOrder = asyncHandler(async (req, res) => {
         password: 0,
         role: 0,
         resetVerifyForSignup: 0,
+        address:0,
+        details: 0,
         __v: 0,
       }
     },
