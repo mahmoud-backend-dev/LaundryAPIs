@@ -18,7 +18,6 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true
   },
   role: {
     type: String,
@@ -30,6 +29,15 @@ const userSchema = new mongoose.Schema({
 
   hashedResetCodeForPassword: String,
   resetVerifyForPassword: Boolean,
+
+  address: {
+    type: String,
+    default: undefined,
+  },
+  details: {
+    type: String,
+    default: undefined,
+  }
 });
 
 userSchema.methods.createJWT = function () {

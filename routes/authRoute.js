@@ -18,7 +18,8 @@ const {
   getAllUsers,
   deleteSpecificUser,
   getAllBookingOrder,
-  deleteUserData
+  deleteUserData,
+  contactUs
 } = require('../controller/authController')
 const {
   signupValidator,
@@ -27,7 +28,8 @@ const {
   forgetPasswordValidator,
   resetPasswordValidator,
   changePasswordValidator,
-  deleteSpecificUserValidator
+  deleteSpecificUserValidator,
+  contactUsValidator
 } = require('../utils/validators/authValidator')
 
 
@@ -49,5 +51,7 @@ router.delete('/users/:id', authMiddleWare, allowTo('admin'), deleteSpecificUser
 router.delete('/deleteMe', authMiddleWare, allowTo('user'),deleteUserData);
 
 router.get('/users/bookingOrder', authMiddleWare, allowTo('user'), getAllBookingOrder);
+
+router.patch('/contactUs', authMiddleWare, allowTo('user'), contactUsValidator, contactUs);
 
 module.exports = router;

@@ -71,6 +71,13 @@ exports.deleteSpecificUserValidator = [
     return true
   }),
   validatorMiddleWare,
+];
+
+
+exports.contactUsValidator = [
+  body('address').notEmpty().withMessage('Adress is required'),
+  body('details').notEmpty().withMessage('Details is required'),
+  validatorMiddleWare,
 ]
 
 

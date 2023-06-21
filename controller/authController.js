@@ -348,6 +348,22 @@ exports.deleteUserData = asyncHandler(async (req, res) => {
 });
 
 
+
+// @desc Contact Us
+// @route PATCH /api/v1/auth/contactUs
+// @protect Protect/User
+exports.contactUs = asyncHandler(async (req, res) => {
+  req.body.firstName = req.user.firstName;
+  req.body.lastName = req.user.lastName;
+  req.body.phone = req.user.phone;
+  const user = await User.findOneAndUpdate(
+    { phone: req.user.phone },
+    req.body,
+    { new: true }
+  ).select('-password');
+  res.status(StatusCodes.OK).json({ status: "Success", user });
+})
+
 // @desc Get All User Booking Order
 // @route DELETE /api/v1/auth/users/bookingOrder
 // @protect Protect/User
