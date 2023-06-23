@@ -25,59 +25,33 @@ exports.allowTo = (...roles) => (asyncHandler(async (req, res, next) => {
 // @protect Public
 exports.signup = asyncHandler(async (req, res, next) => {
   let user = await User.findOne({ phone: req.body.phone });
+  let resetCode;
   if (user && !user.resetVerifyForSignup) {
         // Generate reset code 
-        const resetCode = Math.floor(1000 + Math.random() * 9000).toString();
+        resetCode = Math.floor(1000 + Math.random() * 9000).toString();
         // hash reset code than store in db
         const hashedResetCode = hashedResetCodeByCrypto(resetCode);
         user.hashedResetCodeForSignup = hashedResetCode;
 
         user.resetVerifyForSignup = false;
-        // Send reset code to phone number for varification
-        const option = {
-          to: user.phone,
-          otp:resetCode
-        };
-        try {
-          await sendSMS(option)
-        } catch (error) {
-          user.hashedResetCodeForSignup = undefined;
-
-          user.resetVerifyForSignup = undefined;
-          await user.updateOne(req.body);
-          await user.save();
-          throw new CustomErrorAPI('There is an error in sending phone', StatusCodes.INTERNAL_SERVER_ERROR);
-        }
+        
         await user.updateOne(req.body);
         await user.save();
   } else if(!user) {
     user = new User(req.body);
     // Generate reset code 
-    const resetCode = Math.floor(1000 + Math.random() * 9000).toString();
+    resetCode = Math.floor(1000 + Math.random() * 9000).toString();
     // hash reset code than store in db
     const hashedResetCode = hashedResetCodeByCrypto(resetCode);
     user.hashedResetCodeForSignup = hashedResetCode;
 
     user.resetVerifyForSignup = false;
-    // Send reset code to phone number for varification
-    const option = {
-      to: user.phone,
-      otp:resetCode
-    };
-    try {
-      await sendSMS(option);
-    } catch (error) {
-      user.hashedResetCodeForSignup = undefined;
-
-      user.resetVerifyForSignup = undefined;
-      await user.save();
-      throw new CustomErrorAPI('There is an error in sending phone', StatusCodes.INTERNAL_SERVER_ERROR);
-    }
+    
     await user.save();
   } else {
     throw new BadRequest('Phone is used choose anther phone')
   }
-  res.status(StatusCodes.OK).json({ status: 'Success', message: 'Reset code sent to phone' });
+  res.status(StatusCodes.OK).json({ status: 'Success', resetCode});
 });
 
 // @desc Verify Reset Code For Signup
