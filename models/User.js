@@ -24,12 +24,6 @@ const userSchema = new mongoose.Schema({
     default: 'user',
     enum: ['user', 'admin']
   },
-  hashedResetCodeForSignup: String,
-  resetVerifyForSignup: Boolean,
-
-  hashedResetCodeForPassword: String,
-  resetVerifyForPassword: Boolean,
-
   address: {
     type: String,
     default: undefined,

@@ -6,7 +6,14 @@ const User = require('../../models/User');
 exports.signupValidator = [
   body('firstName').notEmpty().withMessage('First Name is requied'),
   body('lastName').notEmpty().withMessage('Last Name is requied'),
-  body('phone').notEmpty().withMessage('phonel is requied'),
+  body('phone').notEmpty().withMessage('phonel is requied')
+    .custom(async (val) => {
+      const user = await User.findOne({ phone: val });
+      if (user) {
+        throw new BadRequest(`this phone is used, choose anthor phone`)
+      }
+      return true
+    }),
   body('password').notEmpty().withMessage('Password is requied')
     .isLength({ min: 6 }).withMessage('Too short password'),
     body('confirmPassword').notEmpty().withMessage('Confirm password is requied')
@@ -18,11 +25,7 @@ exports.signupValidator = [
   validatorMiddleWare,
 ]
 
-exports.varifyCodeValidator = [
-  body('phone').notEmpty().withMessage('phone is requied'),
-  body('resetCode').notEmpty().withMessage('Reset code is required'),
-  validatorMiddleWare,
-]
+
 
 exports.loginValidator = [
   body('phone').notEmpty().withMessage('phone is requied'),
@@ -30,10 +33,7 @@ exports.loginValidator = [
 validatorMiddleWare,
 ]
 
-exports.forgetPasswordValidator = [
-  body('phone').notEmpty().withMessage('phone is requied'),
-  validatorMiddleWare,
-]
+
 
 exports.resetPasswordValidator = [
   body('phone').notEmpty().withMessage('phone is requied'),
