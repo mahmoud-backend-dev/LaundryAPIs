@@ -43,7 +43,7 @@ exports.login = asyncHandler(async (req, res, next) => {
   if (!user || !isMatch)
     throw new BadRequest('Phone or Password incorrect');
   const token = user.createJWT();
-  res.status(StatusCodes.OK).json({ data: santizeData(user), token });
+  res.status(StatusCodes.OK).json({ user: santizeData(user), token });
 });
 
 
@@ -138,7 +138,6 @@ exports.getAllBookingOrder = asyncHandler(async (req, res) => {
         phone: 0,
         password: 0,
         role: 0,
-        resetVerifyForSignup: 0,
         address:0,
         details: 0,
         __v: 0,

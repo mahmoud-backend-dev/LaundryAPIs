@@ -16,7 +16,7 @@ class ApiFeatures {
     pagination.numberOfPages = Math.ceil(countDocument / limit);
 
     // Next Page
-    if (countDocument < endIndex)
+    if (countDocument > endIndex)
       pagination.next = page + 1;
     // Previous Page
     if (skip > 0)
@@ -26,4 +26,7 @@ class ApiFeatures {
     this.paginationResult = pagination;
     return this
   }
-}
+};
+
+
+module.exports = ApiFeatures;
