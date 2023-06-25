@@ -2,6 +2,7 @@ const validatorMiddleWare = require('../../middleware/validatorMiddleware');
 const { body, param } = require('express-validator');
 const { BadRequest, NotFoundError  } = require('../../errors');
 const User = require('../../models/User');
+const ContactUs = require('../../models/ContactUs');
 
 exports.signupValidator = [
   body('firstName').notEmpty().withMessage('First Name is requied'),
@@ -78,6 +79,16 @@ exports.contactUsValidator = [
   body('address').notEmpty().withMessage('Adress is required'),
   body('details').notEmpty().withMessage('Details is required'),
   validatorMiddleWare,
-]
+];
+
+exports.deleteContactUsValidator = [
+  param('id').custom(async (val) => {
+    const user = await ContactUs.findById(val);
+    if (!user)
+      throw new NotFoundError(`No Contact Us founded for this ${val}`)
+    return true
+  }),
+  validatorMiddleWare,
+];
 
 

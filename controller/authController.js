@@ -4,7 +4,7 @@ const { BadRequest, NotFoundError, UnauthenticatedError } = require('../errors')
 const asyncHandler = require('express-async-handler');
 const User = require('../models/User');
 const { santizeData } = require('../utils/santizeData');
-
+const ContactUs = require('../models/ContactUs');
 
 //  allwoed to (user permission)
 exports.allowTo = (...roles) => (asyncHandler(async (req, res, next) => {
@@ -160,21 +160,6 @@ exports.deleteUserData = asyncHandler(async (req, res) => {
   res.status(StatusCodes.NO_CONTENT).send();
 });
 
-// @desc Contact Us
-// @route PATCH /api/v1/auth/contactUs
-// @protect Protect/User
-exports.contactUs = asyncHandler(async (req, res) => {
-  req.body.firstName = req.user.firstName;
-  req.body.lastName = req.user.lastName;
-  req.body.phone = req.user.phone;
-  const user = await User.findOneAndUpdate(
-    { phone: req.user.phone },
-    req.body,
-    { new: true }
-  ).select('-password');
-  res.status(StatusCodes.OK).json({ status: "Success", user });
-});
-
 // @desc Change Password (Admin)
 // @route PATCH /api/v1/auth/admin/changePassword
 // @protect Protect/Admin
@@ -194,6 +179,32 @@ exports.changePasswordAdmin = asyncHandler(async (req, res) => {
   await user.hashedPassword();
 
   res.status(StatusCodes.OK).json({ data: santizeData(user) })
+});
+
+// @desc Contact Us
+// @route POST /api/v1/auth/contactUs
+// @protect Protect/User
+exports.contactUs = asyncHandler(async (req, res) => {
+  req.body.fullName = `${req.user.firstName} ${req.user.lastName}`;
+  req.body.userPhone = req.user.phone;
+  const contactUs = await ContactUs.create(req.body);
+  res.status(StatusCodes.OK).json({ status: "Success", contactUs });
+});
+
+// @desc Contact Us
+// @route DELETE /api/v1/auth/contactUs/:id
+// @protect Protect/User
+exports.deleteContactUs = asyncHandler(async (req, res) => {
+  await ContactUs.findByIdAndRemove(req.params.id);
+  res.status(StatusCodes.NO_CONTENT).send();
+});
+
+// @desc Get All Contact Us
+// @route GET /api/v1/auth/contactUs/:id
+// @protect Protect/User
+exports.getAllContactUs = asyncHandler(async (req, res) => {
+  const allContactUs = await ContactUs.find({});
+  res.status(StatusCodes.OK).json({ status: "Success", count: allContactUs.length, allContactUs });
 })
 
 

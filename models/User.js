@@ -23,14 +23,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'user',
     enum: ['user', 'admin']
-  },
-  address: {
-    type: String,
-    default: undefined,
-  },
-  details: {
-    type: String,
-    default: undefined,
   }
 });
 
