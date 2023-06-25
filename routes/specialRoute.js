@@ -15,7 +15,6 @@ const {
 
 const {
   addSpecialValidator,
-  deleteSpecialValidator
 } = require('../utils/validators/specialValidator')
 
 

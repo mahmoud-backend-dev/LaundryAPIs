@@ -15,7 +15,6 @@ const {
 
 const {
   addYearlyValidator,
-  deleteYearlyValidator
 } = require('../utils/validators/yearlyValidator')
 
 

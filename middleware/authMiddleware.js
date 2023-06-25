@@ -17,16 +17,7 @@ const protectRoutes = asyncHandler(async (req, res, next) => {
     const user = await User.findById(decoded.userId);
     if (!user)
         throw new UnauthenticatedError('The user that belong to this token does no longer exist')
-    
-    // 4 )  Check if user Change his Password after token created
-    if (user.passwordChangeAt) {
-        const timeStemp = parseInt((
-            user.passwordChangeAt.getTime() / 1000
-        ), 10)
-        // If change his Password after create token (Error)
-        if (timeStemp > decoded.iat)
-            throw new UnauthenticatedError('User recently changed his password, please login again...')
-    }
+
     req.user = user;
     next()
 });

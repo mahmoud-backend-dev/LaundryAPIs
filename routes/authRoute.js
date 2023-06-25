@@ -6,13 +6,8 @@ const authMiddleWare = require('../middleware/authMiddleware');
 
 const {
   signup,
-  varifyResetCodeForSignup,
   login,
-  varifyResetCodeForPassword,
-  forgetPassword,
   resetPassword,
-  resendRestCodeForSignup,
-  resendRestCodeForPassword,
   changePassword,
   allowTo,
   getAllUsers,
