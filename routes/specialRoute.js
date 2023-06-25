@@ -9,9 +9,8 @@ const {
 
 const {
   addBookingSpecial,
-  completedBookingSpecial,
-  deleteBookingSpecial,
-  getAllBookingSpecial
+  getAllBookingSpecial,
+  searchByQueryStringInBookingSpecial
 } = require('../controller/specailController')
 
 const {
@@ -25,9 +24,7 @@ router
   .get(authMiddleWare, allowTo('admin'),getAllBookingSpecial)
   .post(authMiddleWare, allowTo('user'), addSpecialValidator, addBookingSpecial);
 
-router
-  .route('/:id')
-  .patch(authMiddleWare, allowTo('admin'), deleteSpecialValidator, completedBookingSpecial)
-  .delete(authMiddleWare, allowTo('admin'), deleteSpecialValidator, deleteBookingSpecial);
+
+router.get('/search', authMiddleWare, allowTo('admin'), searchByQueryStringInBookingSpecial);
 
 module.exports = router

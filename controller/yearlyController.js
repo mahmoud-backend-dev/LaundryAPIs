@@ -12,19 +12,6 @@ exports.addBookingYearly = asyncHandler(async (req, res) => {
 
 // @desc Delete Booking Yearly
 // @route DELETE api/v1/bookingYearly/:id
-// @protect Protect/Admin
-exports.completedBookingYearly = asyncHandler(async (req, res) => {
-  const completedBookingYearly = await Yearly.findByIdAndUpdate(
-    req.params.id,
-    { completed: true },
-    { new: true }
-  );
-
-  res.status(StatusCodes.OK).json({ status: "Success", completedBookingYearly });
-})
-
-// @desc Delete Booking Yearly
-// @route DELETE api/v1/bookingYearly/:id
 // @protect Protect
 exports.deleteBookingYearly = asyncHandler(async (req, res) => {
   await Yearly.findByIdAndRemove(req.params.id);
@@ -37,4 +24,15 @@ exports.deleteBookingYearly = asyncHandler(async (req, res) => {
 exports.getAllBookingYearly = asyncHandler(async (req, res) => {
   const allBookingYearly = await Yearly.find({ completed: req.query.completed });
   res.status(StatusCodes.OK).json({ status: "Success", count: allBookingYearly.length, allBookingYearly });
+})
+
+// @desc Search By Day in Booking Yearly
+// @route GET api/v1/bookingYearly/search?name= Mahmoud Hamdi
+// @protect Protect/Admin
+exports.searchByQueryStringInBookingYearly = asyncHandler(async (req, res) => {
+  const { name } = req.query;
+  const listName = name.split(' ');
+  const filterList = listName.filter((el) => el !== '').join(" ");
+  const bookingYearlies = await Yearly.find({ fullName: filterList });
+  return res.status(StatusCodes.OK).json({ status: "Success", count: bookingYearlies.length, bookingYearlies });
 })

@@ -9,9 +9,8 @@ const {
 
 const {
   addBookingMonthly,
-  completedBookingMonthly,
-  deleteBookingMonthly,
-  getAllBookingMonthly
+  getAllBookingMonthly,
+  searchByQueryStringInBookingMonthly,
 } = require('../controller/monthlyController')
 
 const {
@@ -25,9 +24,8 @@ router
   .get(authMiddleWare, allowTo('admin'),getAllBookingMonthly)
   .post(authMiddleWare, allowTo('user'), addMonthlyValidator, addBookingMonthly);
 
-router
-  .route('/:id')
-  .patch(authMiddleWare, allowTo('admin'), deleteMonthlyValidator, completedBookingMonthly)
-  .delete(authMiddleWare, allowTo('admin'), deleteMonthlyValidator, deleteBookingMonthly);
+
+
+router.get('/search', authMiddleWare, allowTo('admin'), searchByQueryStringInBookingMonthly);
 
 module.exports = router

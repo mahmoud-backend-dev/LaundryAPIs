@@ -15,8 +15,8 @@ exports.addBookingDaily = asyncHandler(async (req, res) => {
 }) 
 
 
-// @desc Delete Booking Daily
-// @route DELETE api/v1/bookingDaily/:id
+// @desc Completed Booking Daily
+// @route PATCH api/v1/bookingDaily/:id
 // @protect Protect/Admin
 exports.completedBookingDaily = asyncHandler(async (req, res) => {
   const completedBookingDaily = await Daily.findByIdAndUpdate(
@@ -29,13 +29,7 @@ exports.completedBookingDaily = asyncHandler(async (req, res) => {
 })
 
 
-// @desc Delete Booking Daily
-// @route DELETE api/v1/bookingDaily/:id
-// @protect Protect/Admin
-exports.deleteBookingDaily = asyncHandler(async (req, res) => {
-  await Daily.findByIdAndRemove(req.params.id);
-  res.status(StatusCodes.NO_CONTENT).send();
-});
+
 
 
 
@@ -49,4 +43,25 @@ exports.getAllBookingDaily = asyncHandler(async (req, res) => {
   
   const allBookingDaily = await mongooseQuery;
   res.status(StatusCodes.OK).json({ status: "Success", count: allBookingDaily.length, paginationResult, allBookingDaily });
+});
+
+// @desc Search By Day in Booking Daily
+// @route GET api/v1/bookingDaily/search?name= Mahmoud Hamdi
+// @protect Protect/Admin
+exports.searchByQueryStringInBookingDaily = asyncHandler(async (req, res) => {
+  const { start, end, name } = req.query;
+  if (name) {
+    const listName = name.split(' ');
+    const filterList = listName.filter((el) => el !== '').join(" ");
+    const bookingDailies = await Daily.find({ fullName: filterList });
+    return res.status(StatusCodes.OK).json({ status: "Success", count: bookingDailies.length, bookingDailies });
+  }
+  const bookingDailies = await Daily.find({
+    $and: [
+      { date: { $gte: start } },
+      { date: { $lte: end } }
+    ],
+  }).sort('date');
+
+  res.status(StatusCodes.OK).json({ status: "Success", count: bookingDailies.length, bookingDailies });
 })

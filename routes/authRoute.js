@@ -19,13 +19,12 @@ const {
   deleteSpecificUser,
   getAllBookingOrder,
   deleteUserData,
-  contactUs
+  contactUs,
+  changePasswordAdmin
 } = require('../controller/authController')
 const {
   signupValidator,
-  varifyCodeValidator,
   loginValidator,
-  forgetPasswordValidator,
   resetPasswordValidator,
   changePasswordValidator,
   deleteSpecificUserValidator,
@@ -51,4 +50,5 @@ router.get('/users/bookingOrder', authMiddleWare, allowTo('user'), getAllBooking
 
 router.patch('/contactUs', authMiddleWare, allowTo('user'), contactUsValidator, contactUs);
 
+router.patch('/admin/changePassword', authMiddleWare, allowTo('admin'), changePasswordValidator, changePasswordAdmin);
 module.exports = router;

@@ -9,9 +9,8 @@ const {
 
 const {
   addBookingYearly,
-  completedBookingYearly,
-  deleteBookingYearly,
-  getAllBookingYearly
+  getAllBookingYearly,
+  searchByQueryStringInBookingYearly
 } = require('../controller/yearlyController')
 
 const {
@@ -25,9 +24,6 @@ router
   .get(authMiddleWare, allowTo('admin'),getAllBookingYearly)
   .post(authMiddleWare, allowTo('user'), addYearlyValidator, addBookingYearly);
 
-router
-  .route('/:id')
-  .patch(authMiddleWare, allowTo('admin'), deleteYearlyValidator, completedBookingYearly)
-  .delete(authMiddleWare, allowTo('admin'), deleteYearlyValidator, deleteBookingYearly);
 
+router.get('/search', authMiddleWare, allowTo('admin'), searchByQueryStringInBookingYearly);
 module.exports = router

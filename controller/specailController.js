@@ -10,31 +10,21 @@ exports.addBookingSpecial = asyncHandler(async (req, res) => {
   res.status(StatusCodes.OK).json({ status: "Success", bookingSpecial });
 }) 
 
-// @desc Delete Booking Special
-// @route DELETE api/v1/bookingSpecial/:id
-// @protect Protect/Admin
-exports.completedBookingSpecial = asyncHandler(async (req, res) => {
-  const completedBookingSpecial = await Special.findByIdAndUpdate(
-    req.params.id,
-    { completed: true },
-    { new: true }
-  );
-
-  res.status(StatusCodes.OK).json({ status: "Success", completedBookingSpecial });
-})
-
-// @desc Delete Booking Special
-// @route DELETE api/v1/bookingSpecial/:id
-// @protect Protect
-exports.deleteBookingSpecial = asyncHandler(async (req, res) => {
-  await Special.findByIdAndRemove(req.params.id);
-  res.status(StatusCodes.NO_CONTENT).send();
-});
-
 // @desc Get All Booking Special
 // @route GET api/v1/bookingSpecial?completed=true
 // @protect Protect/Admin
 exports.getAllBookingSpecial = asyncHandler(async (req, res) => {
   const allBookingSpecial = await Special.find({ completed: req.query.completed });
   res.status(StatusCodes.OK).json({ status: "Success", count: allBookingSpecial.length, allBookingSpecial });
+});
+
+// @desc Search By Day in Booking Special
+// @route GET api/v1/bookingSpecial/search?name= Mahmoud Hamdi
+// @protect Protect/Admin
+exports.searchByQueryStringInBookingSpecial = asyncHandler(async (req, res) => {
+  const { name } = req.query;
+  const listName = name.split(' ');
+  const filterList = listName.filter((el) => el !== '').join(" ");
+  const bookingSpecials = await Special.find({ fullName: filterList });
+  return res.status(StatusCodes.OK).json({ status: "Success", count: bookingSpecials.length, bookingSpecials });
 })

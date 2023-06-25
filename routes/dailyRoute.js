@@ -10,25 +10,25 @@ const {
 const {
   addBookingDaily,
   completedBookingDaily,
-  deleteBookingDaily,
-  getAllBookingDaily
+  getAllBookingDaily,
+  searchByQueryStringInBookingDaily
 } = require('../controller/dailyController')
 
 const {
   addDailyValidator,
-  // getAllBookingValidator,
+  getAllBookingValidator,
   deleteDailyValidator
 } = require('../utils/validators/dailyValidator')
 
 
 router
   .route('/')
-  .get(authMiddleWare, allowTo('admin'),getAllBookingDaily)
+  .get(authMiddleWare, allowTo('admin'), getAllBookingValidator, getAllBookingDaily)
   .post(authMiddleWare, allowTo('user'), addDailyValidator, addBookingDaily);
 
 router
   .route('/:id')
   .patch(authMiddleWare, allowTo('admin'), deleteDailyValidator, completedBookingDaily)
-  .delete(authMiddleWare, allowTo('admin'), deleteDailyValidator, deleteBookingDaily);
 
+router.get('/search', authMiddleWare, allowTo('admin'), searchByQueryStringInBookingDaily);
 module.exports = router

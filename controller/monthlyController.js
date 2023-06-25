@@ -10,31 +10,21 @@ exports.addBookingMonthly = asyncHandler(async (req, res) => {
   res.status(StatusCodes.OK).json({ status: "Success", bookingMonthly });
 }) 
 
-// @desc Delete Booking Monthly
-// @route DELETE api/v1/bookingMonthly/:id
-// @protect Protect/Admin
-exports.completedBookingMonthly = asyncHandler(async (req, res) => {
-  const completedBookingMonthly = await Monthly.findByIdAndUpdate(
-    req.params.id,
-    { completed: true },
-    { new: true }
-  );
-
-  res.status(StatusCodes.OK).json({ status: "Success", completedBookingMonthly });
-})
-
-// @desc Delete Booking Monthly
-// @route DELETE api/v1/bookingMonthly/:id
-// @protect Protect
-exports.deleteBookingMonthly = asyncHandler(async (req, res) => {
-  await Monthly.findByIdAndRemove(req.params.id);
-  res.status(StatusCodes.NO_CONTENT).send();
-});
-
 // @desc Get All Booking Monthly
 // @route GET api/v1/bookingMonthly?completed=true
 // @protect Protect/Admin
 exports.getAllBookingMonthly = asyncHandler(async (req, res) => {
   const allBookingMonthly = await Monthly.find({ completed: req.query.completed });
   res.status(StatusCodes.OK).json({ status: "Success", count: allBookingMonthly.length, allBookingMonthly });
+});
+
+// @desc Search By Day in Booking Monthly
+// @route GET api/v1/bookingMonthly/search?name= Mahmoud Hamdi
+// @protect Protect/Admin
+exports.searchByQueryStringInBookingMonthly = asyncHandler(async (req, res) => {
+  const { name } = req.query;
+  const listName = name.split(' ');
+  const filterList = listName.filter((el) => el !== '').join(" ");
+  const bookingMonthlies = await Monthly.find({ fullName: filterList });
+  return res.status(StatusCodes.OK).json({ status: "Success", count: bookingMonthlies.length, bookingMonthlies });
 })

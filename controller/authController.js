@@ -1,13 +1,9 @@
-const crypto = require('crypto');
+
 const { StatusCodes } = require('http-status-codes');
-const { CustomErrorAPI, BadRequest, NotFoundError , UnauthenticatedError } = require('../errors');
+const { BadRequest, NotFoundError, UnauthenticatedError } = require('../errors');
 const asyncHandler = require('express-async-handler');
-const {sendSMS} = require('../utils/sendSMS');
 const User = require('../models/User');
 const { santizeData } = require('../utils/santizeData');
-
-const hashedResetCodeByCrypto = (resetCode) => crypto.createHash('sha256').update(resetCode).digest('hex');
-
 
 
 //  allwoed to (user permission)
@@ -19,7 +15,6 @@ exports.allowTo = (...roles) => (asyncHandler(async (req, res, next) => {
   next()
 }))
 
-
 // @desc Signup
 // @route POST api/v1/auth/signup
 // @protect Public
@@ -29,7 +24,6 @@ exports.signup = asyncHandler(async (req, res, next) => {
   const token = user.createJWT()
   res.status(StatusCodes.OK).json({ status: 'Success', token, user: santizeData(user) });
 });
-
 
 // @desc Login
 // @route POST /api/v1/auth/login
@@ -45,8 +39,6 @@ exports.login = asyncHandler(async (req, res, next) => {
   const token = user.createJWT();
   res.status(StatusCodes.OK).json({ user: santizeData(user), token });
 });
-
-
 
 // @desc Reset Password
 // @route POST /api/v1/auth/resetPassword
@@ -68,7 +60,7 @@ exports.resetPassword = asyncHandler(async (req, res) => {
 });
 
 // @desc Change Password
-// @route POST /api/v1/auth/changePassword
+// @route PATCH /api/v1/auth/changePassword
 // @protect Public
 exports.changePassword = asyncHandler(async (req, res) => {
   const user = await User.findOneAndUpdate(
@@ -83,15 +75,15 @@ exports.changePassword = asyncHandler(async (req, res) => {
     }
   );
   await user.hashedPassword();
-  const token = user.createJWT();
-  res.status(StatusCodes.OK).json({ token, data: santizeData(user) });
+
+  res.status(StatusCodes.OK).json({ data: santizeData(user) });
 });
 
 // @desc Get All Users
 // @route GET /api/v1/auth/users
 // @protect Protect/Admin Only
 exports.getAllUsers = asyncHandler(async (req, res) => {
-  const users = await User.find({});
+  const users = await User.find({role:'user'}).select('-password -__v');
   if (Object.keys.length === 0)
     throw new NotFoundError('No users founded')
   
@@ -105,7 +97,6 @@ exports.deleteSpecificUser = asyncHandler(async (req, res) => {
   await User.findByIdAndRemove(req.params.id);
   res.status(StatusCodes.NO_CONTENT).send();
 });
-
 
 // @desc Get All User Booking Order
 // @route DELETE /api/v1/auth/users/bookingOrder
@@ -158,7 +149,6 @@ exports.getAllBookingOrder = asyncHandler(async (req, res) => {
   res.status(StatusCodes.OK).json({ status: "Success", arrayCompleted, arrayNonCompleted });
 });
 
-
 // @desc Delete User Data
 // @route DELETE /api/v1/auth/users/deleteMe
 // @protect Protect/User
@@ -169,8 +159,6 @@ exports.deleteUserData = asyncHandler(async (req, res) => {
   });
   res.status(StatusCodes.NO_CONTENT).send();
 });
-
-
 
 // @desc Contact Us
 // @route PATCH /api/v1/auth/contactUs
@@ -185,7 +173,29 @@ exports.contactUs = asyncHandler(async (req, res) => {
     { new: true }
   ).select('-password');
   res.status(StatusCodes.OK).json({ status: "Success", user });
+});
+
+// @desc Change Password (Admin)
+// @route PATCH /api/v1/auth/admin/changePassword
+// @protect Protect/Admin
+exports.changePasswordAdmin = asyncHandler(async (req, res) => {
+  const user = await User.findOneAndUpdate(
+    {
+      phone: req.body.phone,
+      role: 'admin'
+    },
+    {
+      password: req.body.newPassword
+    },
+    {
+      new: true,
+    }
+  );
+  await user.hashedPassword();
+
+  res.status(StatusCodes.OK).json({ data: santizeData(user) })
 })
+
 
 
 

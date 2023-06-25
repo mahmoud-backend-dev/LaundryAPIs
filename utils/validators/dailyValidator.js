@@ -23,13 +23,9 @@ exports.deleteDailyValidator = [
   validatorMiddleWare,
 ];
 
-// exports.getAllBookingValidator = [
-//   query('completed').notEmpty().withMessage('Completed query string is required')
-//     .custom(async (val) => {
-//       if (val !== true && val !== false) {
-//         throw new BadRequest('Value must be true or false only')
-//       }
-//       return true
-//     }),
-//   validatorMiddleWare
-// ]
+exports.getAllBookingValidator = [
+  query('completed').isBoolean().withMessage('Completed parameter must be a boolean true or false'),
+  validatorMiddleWare
+];
+
+
