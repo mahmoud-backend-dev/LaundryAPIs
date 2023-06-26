@@ -30,9 +30,9 @@ exports.getAllBookingYearly = asyncHandler(async (req, res) => {
 // @route GET api/v1/bookingYearly/search?name= Mahmoud Hamdi
 // @protect Protect/Admin
 exports.searchByQueryStringInBookingYearly = asyncHandler(async (req, res) => {
-  const { name } = req.query;
+  const { name, completed } = req.query;
   const listName = name.split(' ');
   const filterList = listName.filter((el) => el !== '').join(" ");
-  const bookingYearlies = await Yearly.find({ fullName: filterList });
+  const bookingYearlies = await Yearly.find({ fullName: { $regex: filterList, $options: 'i' }, completed });
   return res.status(StatusCodes.OK).json({ status: "Success", count: bookingYearlies.length, bookingYearlies });
 })

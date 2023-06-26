@@ -22,9 +22,9 @@ exports.getAllBookingSpecial = asyncHandler(async (req, res) => {
 // @route GET api/v1/bookingSpecial/search?name= Mahmoud Hamdi
 // @protect Protect/Admin
 exports.searchByQueryStringInBookingSpecial = asyncHandler(async (req, res) => {
-  const { name } = req.query;
+  const { name, completed } = req.query;
   const listName = name.split(' ');
   const filterList = listName.filter((el) => el !== '').join(" ");
-  const bookingSpecials = await Special.find({ fullName: filterList });
+  const bookingSpecials = await Special.find({ fullName: { $regex: filterList, $options: 'i' }, completed });
   return res.status(StatusCodes.OK).json({ status: "Success", count: bookingSpecials.length, bookingSpecials });
 })

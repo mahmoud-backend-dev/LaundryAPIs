@@ -46,14 +46,14 @@ exports.getAllBookingDaily = asyncHandler(async (req, res) => {
 });
 
 // @desc Search By Day in Booking Daily
-// @route GET api/v1/bookingDaily/search?name= Mahmoud Hamdi
+// @route GET api/v1/bookingDaily/search?name= Mahmoud ha&completed=true
 // @protect Protect/Admin
 exports.searchByQueryStringInBookingDaily = asyncHandler(async (req, res) => {
-  const { start, end, name } = req.query;
-  if (name) {
+  const { start, end, name, completed } = req.query;
+  if (name && completed) {
     const listName = name.split(' ');
     const filterList = listName.filter((el) => el !== '').join(" ");
-    const bookingDailies = await Daily.find({ fullName: { $regex: filterList, $options: 'i' } });
+    const bookingDailies = await Daily.find({ fullName: { $regex: filterList, $options: 'i' }, completed });
     return res.status(StatusCodes.OK).json({ status: "Success", count: bookingDailies.length, bookingDailies });
   }
   const bookingDailies = await Daily.find({

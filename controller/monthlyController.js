@@ -19,12 +19,12 @@ exports.getAllBookingMonthly = asyncHandler(async (req, res) => {
 });
 
 // @desc Search By Day in Booking Monthly
-// @route GET api/v1/bookingMonthly/search?name= Mahmoud Hamdi
+// @route GET api/v1/bookingMonthly/search?name= Mahmoud H&completed=true
 // @protect Protect/Admin
 exports.searchByQueryStringInBookingMonthly = asyncHandler(async (req, res) => {
-  const { name } = req.query;
+  const { name, completed } = req.query;
   const listName = name.split(' ');
   const filterList = listName.filter((el) => el !== '').join(" ");
-  const bookingMonthlies = await Monthly.find({ fullName: filterList });
+  const bookingMonthlies = await Monthly.find({ fullName: { $regex: filterList, $options: 'i' }, completed });
   return res.status(StatusCodes.OK).json({ status: "Success", count: bookingMonthlies.length, bookingMonthlies });
 })
