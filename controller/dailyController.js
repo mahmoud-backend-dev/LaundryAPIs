@@ -53,7 +53,7 @@ exports.searchByQueryStringInBookingDaily = asyncHandler(async (req, res) => {
   if (name) {
     const listName = name.split(' ');
     const filterList = listName.filter((el) => el !== '').join(" ");
-    const bookingDailies = await Daily.find({ fullName: filterList });
+    const bookingDailies = await Daily.find({ fullName: { $regex: filterList, $options: 'i' } });
     return res.status(StatusCodes.OK).json({ status: "Success", count: bookingDailies.length, bookingDailies });
   }
   const bookingDailies = await Daily.find({
