@@ -26,7 +26,28 @@ exports.signupValidator = [
   validatorMiddleWare,
 ]
 
-
+exports.registerAsAdminValidator = [
+  body('firstName').notEmpty().withMessage('First Name is requied'),
+  body('lastName').notEmpty().withMessage('Last Name is requied'),
+  body('phone').notEmpty().withMessage('phonel is requied')
+    .custom(async (val) => {
+      const user = await User.findOne({ phone: val });
+      if (user) {
+        throw new BadRequest(`this phone is used, choose anthor phone`)
+      }
+      return true
+    }),
+  body('password').notEmpty().withMessage('Password is requied')
+    .isLength({ min: 6 }).withMessage('Too short password'),
+    body('confirmPassword').notEmpty().withMessage('Confirm password is requied')
+      .custom((val, { req }) => {
+        if (val !== req.body.password)
+          throw new BadRequest('Password confirmation incorrect')
+        req.body.role = 'admin'
+        return true
+    }),  
+  validatorMiddleWare,
+]
 
 exports.loginValidator = [
   body('phone').notEmpty().withMessage('phone is requied'),

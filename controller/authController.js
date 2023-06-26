@@ -205,7 +205,9 @@ exports.deleteContactUs = asyncHandler(async (req, res) => {
 exports.getAllContactUs = asyncHandler(async (req, res) => {
   const allContactUs = await ContactUs.find({});
   res.status(StatusCodes.OK).json({ status: "Success", count: allContactUs.length, allContactUs });
-})
+});
+
+
 
 
 

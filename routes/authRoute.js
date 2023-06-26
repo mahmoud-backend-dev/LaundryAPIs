@@ -26,12 +26,13 @@ const {
   changePasswordValidator,
   deleteSpecificUserValidator,
   contactUsValidator,
-  deleteContactUsValidator
+  deleteContactUsValidator,
+  registerAsAdminValidator
 } = require('../utils/validators/authValidator')
 
 
 router.post('/signup', signupValidator, signup);
-
+router.post('/admin/register', registerAsAdminValidator, signup);
 
 router.post('/login', loginValidator, login);
 
