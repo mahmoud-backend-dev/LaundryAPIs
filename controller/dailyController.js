@@ -59,7 +59,8 @@ exports.searchByQueryStringInBookingDaily = asyncHandler(async (req, res) => {
   const bookingDailies = await Daily.find({
     $and: [
       { date: { $gte: start } },
-      { date: { $lte: end } }
+      { date: { $lte: end } },
+      { completed },
     ],
   }).sort('date');
 
