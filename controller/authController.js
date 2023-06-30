@@ -208,15 +208,9 @@ exports.getAllContactUs = asyncHandler(async (req, res) => {
 
 
 exports.getAllDevicesToken = asyncHandler(async () => {
-  let uniqueArrayOfDevicesToken = [];
   const users = await User.find({ role: 'admin' });
   const mappingList = users.map((el) => el.deviceToken);
-  for (let i = 0; i < mappingList.length; i++){
-    if (uniqueArrayOfDevicesToken.indexOf(mappingList[i]) === -1) {
-      uniqueArrayOfDevicesToken.push(mappingList[i]);
-    }
-  }
-  return uniqueArrayOfDevicesToken;
+  return mappingList.filter((ele, ind) => mappingList.indexOf(ele) === ind && ele !== undefined);
 })
 
 
