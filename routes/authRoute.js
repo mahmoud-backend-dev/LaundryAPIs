@@ -27,9 +27,13 @@ const {
   deleteSpecificUserValidator,
   contactUsValidator,
   deleteContactUsValidator,
-  registerAsAdminValidator
+  registerAsAdminValidator,
+  getDeviceTokenValidator
 } = require('../utils/validators/authValidator')
 
+const { getDeviceToken } = require('../utils/getDviceToken');
+
+router.post('/getDeviceToken', authMiddleWare, allowTo('admin'), getDeviceTokenValidator, getDeviceToken);
 
 router.post('/signup', signupValidator, signup);
 router.post('/admin/register', registerAsAdminValidator, signup);

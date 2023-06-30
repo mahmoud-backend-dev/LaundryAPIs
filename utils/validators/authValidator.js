@@ -112,4 +112,9 @@ exports.deleteContactUsValidator = [
   validatorMiddleWare,
 ];
 
+exports.getDeviceTokenValidator = [
+  body('fcm_token').notEmpty().withMessage("Device Token Is Required"),
+  validatorMiddleWare,
+]
+
 

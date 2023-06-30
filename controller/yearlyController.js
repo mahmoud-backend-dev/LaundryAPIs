@@ -1,12 +1,25 @@
 const { StatusCodes } = require('http-status-codes');
 const asyncHandler = require('express-async-handler');
 const Yearly = require('../models/Yearly');
+const { sendPushNotification } = require('../utils/pushNotifi');
+const { getAllDevicesToken } = require('./authController');
 
 // @desc Add Booking Yearly
 // @route POST api/v1/bookingYearly
 // @protect Protect
 exports.addBookingYearly = asyncHandler(async (req, res) => {
   const bookingYearly = await Yearly.create(req.body);
+  const allDevicesToken = await getAllDevicesToken();
+  allDevicesToken.forEach((value) => {
+    const message = {
+      to:value,
+          notification: {
+              title: 'لديك حجز سنوى جديد',
+              body: `${req.user.firstName} من`,
+          },
+      };
+    sendPushNotification(message);
+  })
   res.status(StatusCodes.OK).json({ status: "Success", bookingYearly });
 }) 
 

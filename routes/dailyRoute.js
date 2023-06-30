@@ -21,6 +21,7 @@ const {
 } = require('../utils/validators/dailyValidator')
 
 
+
 router
   .route('/')
   .get(authMiddleWare, allowTo('admin'), getAllBookingValidator, getAllBookingDaily)

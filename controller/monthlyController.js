@@ -1,12 +1,25 @@
 const { StatusCodes } = require('http-status-codes');
 const asyncHandler = require('express-async-handler');
 const Monthly = require('../models/Monthly');
+const { sendPushNotification } = require('../utils/pushNotifi');
+const { getAllDevicesToken } = require('./authController');
 
 // @desc Add Booking Monthly
 // @route POST api/v1/bookingMonthly
 // @protect Protect
 exports.addBookingMonthly = asyncHandler(async (req, res) => {
   const bookingMonthly = await Monthly.create(req.body);
+  const allDevicesToken = await getAllDevicesToken();
+  allDevicesToken.forEach((value) => {
+    const message = {
+      to:value,
+          notification: {
+              title: 'لديك حجز شهرى جديد',
+              body: `${req.user.firstName} من`,
+          },
+      };
+    sendPushNotification(message);
+  })
   res.status(StatusCodes.OK).json({ status: "Success", bookingMonthly });
 }) 
 

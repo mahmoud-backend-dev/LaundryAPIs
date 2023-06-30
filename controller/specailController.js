@@ -1,12 +1,25 @@
 const { StatusCodes } = require('http-status-codes');
 const asyncHandler = require('express-async-handler');
 const Special = require('../models/Special');
+const { sendPushNotification } = require('../utils/pushNotifi');
+const { getAllDevicesToken } = require('./authController');
 
 // @desc Add Booking Special
 // @route POST api/v1/bookingSpecial
 // @protect Protect
 exports.addBookingSpecial = asyncHandler(async (req, res) => {
   const bookingSpecial = await Special.create(req.body);
+  const allDevicesToken = await getAllDevicesToken();
+  allDevicesToken.forEach((value) => {
+    const message = {
+      to:value,
+          notification: {
+              title: 'لديك حجز خاص جديد',
+              body: `${req.user.firstName} من`,
+          },
+      };
+    sendPushNotification(message);
+  })
   res.status(StatusCodes.OK).json({ status: "Success", bookingSpecial });
 }) 
 

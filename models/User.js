@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'user',
     enum: ['user', 'admin']
+  },
+  deviceToken: {
+    type: String,
+    default: undefined
   }
 });
 

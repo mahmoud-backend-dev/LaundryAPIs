@@ -2,8 +2,8 @@ const { StatusCodes } = require('http-status-codes');
 const asyncHandler = require('express-async-handler');
 const Daily = require('../models/Daily');
 const ApiFeatures = require('../utils/apiFeaturs');
-
-
+const { sendPushNotification } = require('../utils/pushNotifi');
+const { getAllDevicesToken } = require('./authController');
 
 
 // @desc Add Booking Daily
@@ -11,6 +11,17 @@ const ApiFeatures = require('../utils/apiFeaturs');
 // @protect Protect
 exports.addBookingDaily = asyncHandler(async (req, res) => {
   const bookingDaily = await Daily.create(req.body);
+  const allDevicesToken = await getAllDevicesToken();
+  allDevicesToken.forEach((value) => {
+    const message = {
+      to:value,
+          notification: {
+              title: 'لديك حجز يومى جديد',
+              body: `${req.user.firstName} من`,
+          },
+      };
+    sendPushNotification(message);
+  })
   res.status(StatusCodes.OK).json({ status: "Success", bookingDaily });
 }) 
 

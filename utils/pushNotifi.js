@@ -1,19 +1,17 @@
-// const asyncHandler = require('express-async-handler');
-// const admin = require('firebase-admin');
-// const serviceAccount = require('../laundry-apis-firebase-adminsdk-nta3e-c8a9f7ead0.json');
+const FCM = require('fcm-node');
+const fcm = new FCM(process.env.SERVER_KEY);
 
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount)
-// })
 
-// const sendNotification = asyncHandler(async () => {
-//   const response = await admin.messaging().send({
-//     notification: {
-//       title: 'Notification Title',
-//       body: 'Notification Body',
-//     },
-//     token:
-//   })
-//   console.log(response);
-// })
 
+
+exports.sendPushNotification = async (message) => {
+  fcm.send(message, function (err, response) {
+    if (err) {
+      console.log("Respponse:! " + response);
+      throw err;
+    } else {
+      console.log("Successfully sent with response: ", response);
+    }
+
+  })
+}

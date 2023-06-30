@@ -153,7 +153,6 @@ exports.getAllBookingOrder = asyncHandler(async (req, res) => {
 // @route DELETE /api/v1/auth/users/deleteMe
 // @protect Protect/User
 exports.deleteUserData = asyncHandler(async (req, res) => {
-  console.log("teas");
   await User.findOneAndRemove({
     _id: req.user._id
   });
@@ -207,6 +206,11 @@ exports.getAllContactUs = asyncHandler(async (req, res) => {
   res.status(StatusCodes.OK).json({ status: "Success", count: allContactUs.length, allContactUs });
 });
 
+
+exports.getAllDevicesToken = asyncHandler(async () => {
+  const users = await User.find({ role: 'admin' });
+  return users.map((el) => el.deviceToken);
+})
 
 
 
