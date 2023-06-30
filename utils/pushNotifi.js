@@ -8,7 +8,6 @@ exports.sendPushNotification = (message) => {
   fcm.send(message, function (err, response) {
     if (err) {
       console.log("Respponse:! " + response);
-      throw err;
     } else {
       console.log("Successfully sent with response: ", response);
     }
