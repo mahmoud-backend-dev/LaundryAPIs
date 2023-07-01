@@ -1,7 +1,6 @@
 const { StatusCodes } = require('http-status-codes');
 const asyncHandler = require('express-async-handler');
 const Daily = require('../models/Daily');
-const ApiFeatures = require('../utils/apiFeaturs');
 const { sendPushNotification } = require('../utils/pushNotifi');
 const { getAllDevicesToken } = require('./authController');
 
@@ -48,12 +47,8 @@ exports.completedBookingDaily = asyncHandler(async (req, res) => {
 // @route GET api/v1/bookingDaily?completed=true
 // @protect Protect/Admin
 exports.getAllBookingDaily = asyncHandler(async (req, res) => {
-  const countDocument = await Daily.countDocuments();
-  const { mongooseQuery, paginationResult } = new ApiFeatures(Daily.find({ completed: req.query.completed }), req.query)
-    .paginate(countDocument);
-  
-  const allBookingDaily = await mongooseQuery;
-  res.status(StatusCodes.OK).json({ status: "Success", count: allBookingDaily.length, paginationResult, allBookingDaily });
+  const allBookingDaily  =await Daily.find({ completed: req.query.completed });
+  res.status(StatusCodes.OK).json({ status: "Success", count: allBookingDaily.length,  allBookingDaily });
 });
 
 // @desc Search By Day in Booking Daily
